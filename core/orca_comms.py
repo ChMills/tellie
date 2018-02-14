@@ -154,7 +154,7 @@ def tellie_read(tellie_serial):
             print pin_out
             return '%s|%s' % (comms_flags.tellie_pinout, json.dumps(pin_out))
         else:
-           return comms_flags.tellie_notready
+            return comms_flags.tellie_notready
     except tellie_exception.TellieException, e:
         pin_out = ''
         print e, type(e)

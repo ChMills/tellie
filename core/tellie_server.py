@@ -205,8 +205,6 @@ class SerialCommand(object):
             self.log_phrase("Written chars %s" % self.parse_hex(c), 0, _snotDaqLog)
             self.log_phrase("Bytes written %d" % bytesWritten, 0, _snotDaqLog)
             time.sleep(sleep_after_command)
-        #except Exception as e:
-        #    raise TellieException("Lost connection with TELLIE hardware! Re-set server")
 
         if not buffer_check: # assume returns same as input
             buffer_check = ''
@@ -337,10 +335,11 @@ class SerialCommand(object):
         if len(self._channel)!=1:
             self.log_phrase("Cannot fire with >1 channel! Averaging request denied.", 2, _snotDaqLog)
             return
-        if self._firing is True:
-            self.log_phrase("Already in firing mode! Averaging request denied.", 2, _snotDaqLog)
-            return
-        if self._channel[0] <= 56: #up to box 7     (NOTE: serial_command.py did NOT have the index!)
+        if self._firing is True:     # previous subrun probably didn't finish
+            self.log_phrase("Already in firing mode! Sending premature stop command.", 2, _snotDaqLog)
+            buffer_readout = self.stop_trig_average().replace("\t"," ")
+            self.log_phrase("Sent premature stop command. PIN readings were %s" % buffer_readout, 2, _snotDaqLog)
+        if self._channel[0] <= 56: #up to box 7
             cmd = p._cmd_fire_average_ext_trig_lower
         else:
             cmd = p._cmd_fire_average_ext_trig_upper
@@ -435,6 +434,18 @@ class SerialCommand(object):
         self._firing = False
         return buffer_contents
 
+    # Special case where previous subrun didn't finish
+    def stop_trig_average(self):
+        """Stop averaging triggers"""
+        self.log_phrase("Stop firing!", 0, _snotDaqLog)
+        self._send_command(p._cmd_stop, False)
+        time.sleep(p._short_pause)
+        buffer_contents = self.read_buffer()
+        self.disable_external_trigger()
+        # Note that this does not clear channel settings!
+        self._firing = False
+        return buffer_contents
+    
     def read_pin(self, channel=None, timeout=p._medium_pause, final=True):
         """Read the pin diode output, should always follow a fire command,
         Provide channel number to select specific channel, otherwise, receive dict of all channels"""
@@ -442,10 +453,10 @@ class SerialCommand(object):
         #if in firing mode, check the buffer shows the sequence has ended
         if self._firing:
             if self.read_buffer() == p._buffer_end_sequence:
-                print "K in buffer"
+                self.log_phrase("K in buffer", 0, _snotDaqLog);
                 self._firing = False
             else:
-                print "No K in buffer"
+                self.log_phrase("No K in buffer", 0, _snotDaqLog);
                 return None
         if channel:
             if self._reading is True:
@@ -524,6 +535,32 @@ class SerialCommand(object):
                 self.log_phrase("Unable to convert numbers to floats Numbers: %s Buffer: %s",str(numbers),output, 2, _snotDaqLog)
                 return None
 
+        else:
+            self.log_phrase("Bad number of PIN readouts: %s %s" % (len(numbers), numbers), 2, _snotDaqLog)
+            return None
+        self._firing = False
+        value_dict = {self._channel[0]: pin}
+        rms_dict = {self._channel[0]: rms}
+        return pin, rms, self._channel
+
+    # Special case where previous subrun didn't finish
+    def read_pin_sequence_timeout(self):
+        """Read a pin from the sequence firing mode after a timeout.
+        """
+        self.log_phrase("Read PIN sequence after timeout", 2, _snotDaqLog)
+        if self._firing is not True:
+            raise TellieException("Cannot read pin, not in firing mode")
+        time.sleep(p._buffer_pause)
+        output = self.stop_trig_average()
+        self.log_phrase("BUFFER: %s" % output, 0, _snotDaqLog)
+        numbers = output.split()
+        if len(numbers) == 2:
+            try:
+                pin = float(numbers[0])
+                rms = float(numbers[1])
+            except:
+                self.log_phrase("Unable to convert numbers to floats Numbers: %s Buffer: %s",str(numbers),output, 2, _snotDaqLog)
+                return None
         else:
             self.log_phrase("Bad number of PIN readouts: %s %s" % (len(numbers), numbers), 2, _snotDaqLog)
             return None
