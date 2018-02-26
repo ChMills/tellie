@@ -2,6 +2,7 @@
 from SimpleXMLRPCServer import SimpleXMLRPCServer
 import xmlrpclib
 import sys
+import time
 from common import parameters as p
 
 server = xmlrpclib.ServerProxy("http://localhost:5030")
@@ -29,6 +30,7 @@ if __name__=="__main__":
         safe_exit(server,e)
 
     mean = None
+    start = time.time()
     try:
         print "Waiting for sequence to finish..."
         while (mean == None):
@@ -36,6 +38,11 @@ if __name__=="__main__":
                 mean, rms, chan = server.read_pin_sequence()
             except TypeError:
                 mean = None
+            now = time.time()
+            print "Elapsed time: %.3f seconds..." % (now-start)
+            if (now-start > 8.):
+                print "Timed out (>8 sec). Reading PIN values..."
+                mean, rms, chan = server.read_pin_sequence_timeout()
     except Exception,e:
         safe_exit(server,e)
     except KeyboardInterrupt:
