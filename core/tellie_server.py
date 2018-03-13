@@ -852,9 +852,9 @@ def command_pulse_width(par):
 
 def command_pulse_number(par):
     """Get the command to set a pulse number"""
+    par = int(par)
     if par > p._max_pulse_number or par < 0:
         raise TellieException("Invalid pulse number: %s" % (par))
-    par = int(par)
     #parameters  = ParametersClass()
     adjusted, actual_par, hi, lo = p.pulse_number(par)
     if adjusted is True:
