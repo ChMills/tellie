@@ -13,7 +13,7 @@ import argparse
 import json
 
 # set up access to database
-database = tellie_database.TellieDatabase('http://couch.snopl.us', 'telliedb', 'snoplus', 'dontestopmenow')
+database = tellie_database.TellieDatabase('http://couch.snopl.us', 'telliedb')
 
 # main function
 if __name__=="__main__":

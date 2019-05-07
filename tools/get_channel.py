@@ -22,7 +22,7 @@ import numpy as np
 matplotlib.rcParams.update({'font.size': 13})
 
 # set up access to database
-database = tellie_database.TellieDatabase('http://couch.snopl.us', 'telliedb', 'snoplus', 'dontestopmenow')
+database = tellie_database.TellieDatabase('http://couch.snopl.us', 'telliedb')
 
 # load channel data from couchDBs
 def get_channel(channel):
@@ -91,31 +91,27 @@ if __name__=="__main__":
 
         # make plots
         fig = plt.figure(figsize=(18, 13))
-        fig.add_subplot(2,2,1)
-        plt.title('IPW vs Photons')
+        fig.add_subplot(1,3,1)
         plt.xlabel('IPW', fontweight='bold')
         plt.ylabel('Photons', fontweight='bold')
         plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
         plt.errorbar(m_ipw, m_photons, xerr=None, yerr=m_photons_rms, fmt='r.')
+        plt.errorbar(s_ipw, s_photons, xerr=None, yerr=s_photons_rms, fmt='b.')
         plt.grid(True)
-        fig.add_subplot(2,2,2)
-        plt.title('IPW vs PIN')
+        fig.add_subplot(1,3,2)
         plt.xlabel('IPW', fontweight='bold')
         plt.ylabel('PIN', fontweight='bold')
         plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
         plt.errorbar(m_ipw, m_pin, xerr=None, yerr=m_pin_rms, fmt='r.')
-        plt.grid(True)
-        fig.add_subplot(2,2,3)
-        plt.xlabel('IPW', fontweight='bold')
-        plt.ylabel('Photons', fontweight='bold')
-        plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
-        plt.errorbar(s_ipw, s_photons, xerr=None, yerr=s_photons_rms, fmt='b.')
-        plt.grid(True)
-        fig.add_subplot(2,2,4)
-        plt.xlabel('IPW', fontweight='bold')
-        plt.ylabel('PIN', fontweight='bold')
-        plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
         plt.errorbar(s_ipw, s_pin, xerr=None, yerr=s_pin_rms, fmt='b.')
+        plt.grid(True)
+        fig.add_subplot(1,3,3)
+        plt.xlabel('PIN', fontweight='bold')
+        plt.ylabel('Photons', fontweight='bold')
+        plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+        plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+        plt.errorbar(m_pin, m_photons, xerr=m_pin_rms, yerr=m_photons_rms, fmt='r.')
+        plt.errorbar(s_pin, s_photons, xerr=s_pin_rms, yerr=s_photons_rms, fmt='b.')
         plt.grid(True)
 
         # male legend
