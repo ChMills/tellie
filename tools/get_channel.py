@@ -22,7 +22,7 @@ import numpy as np
 matplotlib.rcParams.update({'font.size': 13})
 
 # set up access to database
-database = tellie_database.TellieDatabase('http://couch.snopl.us', 'telliedb')
+database = tellie_database.TellieDatabase('http://couch.snopl.us', 'telliedb', 'snoplus', 'dontestopmenow')
 
 # load channel data from couchDBs
 def get_channel(channel):
@@ -53,7 +53,8 @@ def get_channel(channel):
         s_photons_rms = row.doc['slave_photons_rms']
         s_pin = row.doc['slave_PIN']
         s_pin_rms = row.doc['slave_PIN_rms']
-    return channel, cone, driver, PIN_board, fibre_delay, m_ipw, m_photons, m_photons_rms, m_pin, m_pin_rms, s_ipw, s_photons, s_photons_rms, s_pin, s_pin_rms
+        timestamp = row.doc['timestamp']
+    return channel, cone, driver, PIN_board, fibre_delay, m_ipw, m_photons, m_photons_rms, m_pin, m_pin_rms, s_ipw, s_photons, s_photons_rms, s_pin, s_pin_rms, timestamp
 
 # main function
 if __name__=="__main__":
@@ -76,6 +77,7 @@ if __name__=="__main__":
         print 'Driver: ', data[2]
         print 'PIN_board: ', data[3]
         print 'fibre_delay: ', data[4]
+        print 'timestamp: ', data[15]
 
         # store loaded data
         m_ipw = data[5]
@@ -91,21 +93,28 @@ if __name__=="__main__":
 
         # make plots
         fig = plt.figure(figsize=(18, 13))
-        fig.add_subplot(1,3,1)
+        fig.suptitle('CHANNEL ' + str(channel), fontweight='bold', fontsize=18)
+        fig.add_subplot(2,2,1)
         plt.xlabel('IPW', fontweight='bold')
         plt.ylabel('Photons', fontweight='bold')
         plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
         plt.errorbar(m_ipw, m_photons, xerr=None, yerr=m_photons_rms, fmt='r.')
         plt.errorbar(s_ipw, s_photons, xerr=None, yerr=s_photons_rms, fmt='b.')
         plt.grid(True)
-        fig.add_subplot(1,3,2)
+        fig.add_subplot(2,2,2)
         plt.xlabel('IPW', fontweight='bold')
         plt.ylabel('PIN', fontweight='bold')
         plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
         plt.errorbar(m_ipw, m_pin, xerr=None, yerr=m_pin_rms, fmt='r.')
         plt.errorbar(s_ipw, s_pin, xerr=None, yerr=s_pin_rms, fmt='b.')
         plt.grid(True)
-        fig.add_subplot(1,3,3)
+
+        # make legend
+        l1 = mpatches.Patch(color='red', label='MASTER')
+        l2 = mpatches.Patch(color='blue', label='SLAVE')
+        plt.legend(handles=[l1,l2])
+
+        fig.add_subplot(2,2,3)
         plt.xlabel('PIN', fontweight='bold')
         plt.ylabel('Photons', fontweight='bold')
         plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
@@ -114,10 +123,22 @@ if __name__=="__main__":
         plt.errorbar(s_pin, s_photons, xerr=s_pin_rms, yerr=s_photons_rms, fmt='b.')
         plt.grid(True)
 
-        # male legend
-        l1 = mpatches.Patch(color='red', label='MASTER')
-        l2 = mpatches.Patch(color='blue', label='SLAVE')
-        plt.legend(handles=[l1,l2])
+        # 4th figure - text output
+        fig.add_subplot(2,2,4)
+        plt.axis('off')
+        plt.text(0.15, 0.7, 'HW INFO', fontweight='bold')
+        plt.text(0.15, 0.6, 'Channel: ')
+        plt.text(0.45, 0.6, str(data[0]))
+        plt.text(0.15, 0.5, 'Cone: ')
+        plt.text(0.45, 0.5, data[1])
+        plt.text(0.15, 0.4, 'LED Driver: ')
+        plt.text(0.45, 0.4, str(data[2]))
+        plt.text(0.15, 0.3, 'PIN Board: ')
+        plt.text(0.45, 0.3, data[3])
+        plt.text(0.15, 0.2, 'Fibre Delay: ')
+        plt.text(0.45, 0.2, str(data[4]))
+        plt.text(0.15, 0.1, 'Timestamp: ')
+        plt.text(0.45, 0.1, data[15])
 
         # show plots
         plt.show()
