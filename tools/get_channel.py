@@ -136,9 +136,9 @@ if __name__=="__main__":
         plt.text(0.15, 0.3, 'PIN Board: ')
         plt.text(0.45, 0.3, data[3])
         plt.text(0.15, 0.2, 'Fibre Delay: ')
-        plt.text(0.45, 0.2, str(data[4]))
+        plt.text(0.45, 0.2, str(data[4]) + ' ns')
         plt.text(0.15, 0.1, 'Timestamp: ')
-        plt.text(0.45, 0.1, data[15])
+        plt.text(0.45, 0.1, data[15][0:10] + ' ' + data[15][12:19] + ' (ET)')
 
         # show plots
         plt.show()
