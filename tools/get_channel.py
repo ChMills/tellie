@@ -22,7 +22,7 @@ import numpy as np
 matplotlib.rcParams.update({'font.size': 13})
 
 # set up access to database
-database = tellie_database.TellieDatabase('http://couch.snopl.us', 'telliedb', 'snoplus', 'dontestopmenow')
+database = tellie_database.TellieDatabase('http://couch.snopl.us', 'telliedb')
 
 # load channel data from couchDBs
 def get_channel(channel):
