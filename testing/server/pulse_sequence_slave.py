@@ -40,9 +40,9 @@ if __name__=="__main__":
                 mean = None
             now = time.time()
             print "Elapsed time: %.3f seconds..." % (now-start)
-            if (now-start > 8.):
-                print "Timed out (>8 sec). Reading PIN values..."
-                mean, rms, chan = server.read_pin_sequence_timeout()
+            #if (now-start > 8.):
+            #    print "Timed out (>8 sec). Reading PIN values..."
+            #    mean, rms, chan = server.read_pin_sequence_timeout()
     except Exception,e:
         safe_exit(server,e)
     except KeyboardInterrupt:
