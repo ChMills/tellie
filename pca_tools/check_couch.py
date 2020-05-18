@@ -1,14 +1,14 @@
 import os
 import couchdb
 import getpass
+from env import *
 
 # connect to couch
 pw = getpass.getpass("CouchDB password: ")
-couchserver = couchdb.Server("http://snoplus:%s@couch.snopl.us" % pw)
+couchserver = couchdb.Server("http://" + db_username + ":" + pw + "@" + db_address)
 
 # select db
-dbname = "telliedb"
-db = couchserver[dbname]
+db = couchserver[db_name]
 
 lists = []
 wrong = []
@@ -22,8 +22,8 @@ for list in lists:
 	missing = []
 	with open(list) as f:
     		content = f.readlines()
-		content = [x.strip() for x in content] 
-	
+		content = [x.strip() for x in content]
+
 	print "List: ", list
 	print "Runs: ", len(content)
 
@@ -35,11 +35,10 @@ for list in lists:
     			id = item.id
 			subruns = len(db[id]['sub_run_info'])
 			print "Subruns in couchdb: ", subruns
-			if (subruns != 40): 
+			if (subruns != n_subruns):
 				print " !!! WRONG NUMBER OF SUBRUNS !!! "
 				wrong.append ( run )
 
 	print "List DONE, wrong runs: ", wrong
 
 print "All DONE, wrong runs: ", wrong
-
