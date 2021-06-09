@@ -526,7 +526,19 @@ class SerialCommand(object):
         numbers = output.split()
         if len(numbers) == 0:
             self.log_phrase("Sequence doesn't appear to have finished..", 0, _snotDaqLog)
-            return None
+            count = 0
+            timeout = 5
+            while(count < timeout):
+                time.sleep(p._medium_pause)
+                output = self.read_buffer()
+                self.log_phrase("BUFFER: %s" % output, 0, _snotDaqLog)
+                numbers = output.split()
+                if len(numbers) != 0:
+                    break
+                count += 1
+            if count >= timeout:
+                self.read_pin_sequence_timeout()
+            
         #If we only get one number it is likely the PIC hasnt finished writing to the buffer
         if len(numbers) == 1:
             #Wait a bit longer and then read out the buffer again
